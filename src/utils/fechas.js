@@ -110,3 +110,75 @@ export function tiempoRestante(date) {
     segundos: totalSegundos % 60,
   };
 }
+
+/**
+ * Formatea una fecha al formato corto "DD/MM HH:MM".
+ * @param {Date|Object|string} date
+ * @returns {string}
+ */
+export function formatearFechaCorta(date) {
+  const d = normalizarFecha(date);
+  if (!d) return '';
+
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const horas = String(d.getHours()).padStart(2, '0');
+  const minutos = String(d.getMinutes()).padStart(2, '0');
+
+  return `${dia}/${mes} ${horas}:${minutos}`;
+}
+
+/**
+ * Convierte un texto "DD/MM HH:MM" (o "DD/MM/AAAA HH:MM") en un Date usando el año de referencia.
+ * @param {string} texto
+ * @param {number} [anioReferencia]
+ * @returns {Date|null}
+ */
+export function parsearFechaCorta(texto, anioReferencia = new Date().getFullYear()) {
+  if (!texto) return null;
+  const str = String(texto).trim();
+
+  // Intento con formato completo "DD/MM/AAAA HH:MM"
+  const matchCompleto = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})$/.exec(str);
+  if (matchCompleto) {
+    const [, dia, mes, anio, horas, minutos] = matchCompleto.map(Number);
+    if (horas > 23 || minutos > 59) return null;
+    const f = new Date(anio, mes - 1, dia, horas, minutos);
+    if (f.getDate() !== dia || f.getMonth() !== mes - 1) return null;
+    return f;
+  }
+
+  // Formato corto "DD/MM HH:MM"
+  const matchCorto = /^(\d{2})\/(\d{2}) (\d{2}):(\d{2})$/.exec(str);
+  if (matchCorto) {
+    const [, dia, mes, horas, minutos] = matchCorto.map(Number);
+    if (horas > 23 || minutos > 59) return null;
+    const f = new Date(anioReferencia, mes - 1, dia, horas, minutos);
+    if (f.getDate() !== dia || f.getMonth() !== mes - 1) return null;
+    return f;
+  }
+
+  return null;
+}
+
+/**
+ * Determina si la fecha de fin de una preventa ya pasó.
+ * @param {string} fechaFinTexto - Texto con formato "DD/MM HH:MM" o "DD/MM/AAAA HH:MM".
+ * @param {Date|number} [anioOFechaReferencia] - Objeto Date de la fiesta o año de referencia.
+ * @returns {boolean}
+ */
+export function preventaVencida(fechaFinTexto, anioOFechaReferencia) {
+  if (!fechaFinTexto) return false;
+
+  let anio = new Date().getFullYear();
+  if (anioOFechaReferencia instanceof Date) {
+    anio = anioOFechaReferencia.getFullYear();
+  } else if (typeof anioOFechaReferencia === 'number') {
+    anio = anioOFechaReferencia;
+  }
+
+  const fechaFin = parsearFechaCorta(fechaFinTexto, anio);
+  if (!fechaFin) return false;
+
+  return fechaFin.getTime() < Date.now();
+}

@@ -3,6 +3,8 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 're
 import { useFocusEffect } from '@react-navigation/native';
 import Countdown from '../components/Countdown';
 import CustomButton from '../components/CustomButton';
+import PreventaCard from '../components/PreventaCard';
+import RrppCard from '../components/RrppCard';
 import { eliminarFiesta, obtenerFiesta } from '../services/fiestaService';
 import { theme } from '../theme';
 import { mensajeErrorFiesta } from '../utils/errores';
@@ -98,6 +100,32 @@ export default function FiestaDetailScreen({ navigation, route }) {
         </>
       ) : null}
 
+      <Text style={styles.seccion}>Tickets y preventas</Text>
+      {fiesta.preventas?.length ? (
+        fiesta.preventas.map((preventa, index) => (
+          <PreventaCard
+            key={`preventa-${index}`}
+            preventa={preventa}
+            fechaFiesta={fiesta.fecha}
+          />
+        ))
+      ) : (
+        <Text style={styles.textoVacio}>Todavía no hay preventas cargadas.</Text>
+      )}
+
+      <Text style={styles.seccion}>Vendedores oficiales</Text>
+      {fiesta.rrpp?.length ? (
+        fiesta.rrpp.map((vendedor, index) => (
+          <RrppCard
+            key={`rrpp-${index}`}
+            rrpp={vendedor}
+            nombreFiesta={fiesta.nombre}
+          />
+        ))
+      ) : (
+        <Text style={styles.textoVacio}>Todavía no hay vendedores RRPP cargados.</Text>
+      )}
+
       <View style={styles.acciones}>
         <CustomButton
           titulo="Editar"
@@ -180,6 +208,10 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: 16,
     lineHeight: 24,
+  },
+  textoVacio: {
+    color: theme.colors.secondary,
+    fontSize: 14,
   },
   acciones: {
     marginTop: 32,

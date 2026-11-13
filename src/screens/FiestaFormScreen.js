@@ -12,6 +12,8 @@ import {
 import ColorPicker, { COLORES_FIESTA } from '../components/ColorPicker';
 import CustomButton from '../components/CustomButton';
 import FormInput from '../components/FormInput';
+import PreventaItemForm from '../components/PreventaItemForm';
+import RrppItemForm from '../components/RrppItemForm';
 import { useAuth } from '../context/AuthContext';
 import { actualizarFiesta, crearFiesta, obtenerFiesta } from '../services/fiestaService';
 import { theme } from '../theme';
@@ -30,8 +32,12 @@ export default function FiestaFormScreen({ navigation, route }) {
   const [fechaTexto, setFechaTexto] = useState('');
   const [color, setColor] = useState(COLORES_FIESTA[0]);
   const [destacada, setDestacada] = useState(false);
+  const [preventas, setPreventas] = useState([]);
+  const [rrpp, setRrpp] = useState([]);
 
   const [errores, setErrores] = useState({});
+  const [erroresPreventas, setErroresPreventas] = useState([]);
+  const [erroresRrpp, setErroresRrpp] = useState([]);
   const [errorGeneral, setErrorGeneral] = useState('');
   const [cargandoFiesta, setCargandoFiesta] = useState(esEdicion);
   const [guardando, setGuardando] = useState(false);
@@ -56,6 +62,27 @@ export default function FiestaFormScreen({ navigation, route }) {
         setFechaTexto(fechaATexto(fiesta.fecha));
         setColor(fiesta.color || COLORES_FIESTA[0]);
         setDestacada(Boolean(fiesta.destacada));
+        setPreventas(
+          Array.isArray(fiesta.preventas)
+            ? fiesta.preventas.map((item) => ({
+                ...item,
+                nombre: item.nombre || '',
+                precio: item.precio ?? '',
+                inicio: item.inicio || '',
+                fin: item.fin || '',
+              }))
+            : []
+        );
+        setRrpp(
+          Array.isArray(fiesta.rrpp)
+            ? fiesta.rrpp.map((item) => ({
+                ...item,
+                nombre: item.nombre || '',
+                zona: item.zona || '',
+                telefono: item.telefono || '',
+              }))
+            : []
+        );
       } catch (error) {
         setErrorGeneral(mensajeErrorFiesta(error));
       } finally {
@@ -73,8 +100,50 @@ export default function FiestaFormScreen({ navigation, route }) {
     if (!parsearFechaTexto(fechaTexto)) {
       nuevosErrores.fecha = 'Usá el formato DD/MM/AAAA HH:MM con una fecha real.';
     }
+    const nuevosErroresPreventas = preventas.map((item) => {
+      const errorItem = {};
+      if (!item.nombre.trim()) errorItem.nombre = 'El nombre es obligatorio.';
+      const precio = Number(item.precio);
+      if (!Number.isFinite(precio) || precio <= 0) {
+        errorItem.precio = 'El precio debe ser mayor a $0.';
+      }
+      return errorItem;
+    });
+    const nuevosErroresRrpp = rrpp.map((item) => {
+      const errorItem = {};
+      if (!item.nombre.trim()) errorItem.nombre = 'El nombre es obligatorio.';
+      const digitos = String(item.telefono || '').replace(/\D/g, '');
+      if (digitos.length < 10 || digitos.length > 15) {
+        errorItem.telefono = 'Ingresá entre 10 y 15 dígitos, incluido el código de país.';
+      }
+      return errorItem;
+    });
     setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0;
+    setErroresPreventas(nuevosErroresPreventas);
+    setErroresRrpp(nuevosErroresRrpp);
+    return (
+      Object.keys(nuevosErrores).length === 0 &&
+      nuevosErroresPreventas.every((item) => Object.keys(item).length === 0) &&
+      nuevosErroresRrpp.every((item) => Object.keys(item).length === 0)
+    );
+  }
+
+  function cambiarPreventa(index, campo, valor) {
+    setPreventas((actuales) =>
+      actuales.map((item, i) => (i === index ? { ...item, [campo]: valor } : item))
+    );
+    setErroresPreventas((actuales) =>
+      actuales.map((item, i) => (i === index ? { ...item, [campo]: undefined } : item))
+    );
+  }
+
+  function cambiarRrpp(index, campo, valor) {
+    setRrpp((actuales) =>
+      actuales.map((item, i) => (i === index ? { ...item, [campo]: valor } : item))
+    );
+    setErroresRrpp((actuales) =>
+      actuales.map((item, i) => (i === index ? { ...item, [campo]: undefined } : item))
+    );
   }
 
   async function guardar() {
@@ -88,18 +157,29 @@ export default function FiestaFormScreen({ navigation, route }) {
       fecha: parsearFechaTexto(fechaTexto),
       color,
       destacada,
+      preventas: preventas.map((item) => ({
+        ...item,
+        nombre: item.nombre.trim(),
+        precio: Number(item.precio),
+        inicio: item.inicio.trim(),
+        fin: item.fin.trim(),
+      })),
+      rrpp: rrpp.map((item) => ({
+        ...item,
+        nombre: item.nombre.trim(),
+        zona: item.zona.trim(),
+        telefono: String(item.telefono || '').replace(/\D/g, ''),
+      })),
     };
 
     setGuardando(true);
     try {
       if (esEdicion) {
-        // Solo se mandan los campos del formulario: preventas, rrpp, ubicación e imagen no se pisan
+        // La ubicación y la imagen se conservan porque no forman parte de este formulario.
         await actualizarFiesta(fiestaId, datos);
       } else {
         await crearFiesta(usuario.uid, {
           ...datos,
-          preventas: [],
-          rrpp: [],
           ubicacion: null,
           imagenUri: null,
         });
@@ -169,6 +249,55 @@ export default function FiestaFormScreen({ navigation, route }) {
           />
         </View>
 
+        <Text style={styles.tituloSeccion}>Preventas</Text>
+        {preventas.map((item, index) => (
+          <PreventaItemForm
+            key={`preventa-${index}`}
+            item={item}
+            index={index}
+            errores={erroresPreventas[index]}
+            onChange={(campo, valor) => cambiarPreventa(index, campo, valor)}
+            onQuitar={() => {
+              setPreventas((actuales) => actuales.filter((_, i) => i !== index));
+              setErroresPreventas((actuales) => actuales.filter((_, i) => i !== index));
+            }}
+          />
+        ))}
+        <CustomButton
+          titulo="+ Agregar preventa"
+          variante="secundario"
+          onPress={() => {
+            setPreventas((actuales) => [
+              ...actuales,
+              { nombre: `Preventa ${actuales.length + 1}`, precio: '', inicio: '', fin: '' },
+            ]);
+            setErroresPreventas((actuales) => [...actuales, {}]);
+          }}
+        />
+
+        <Text style={styles.tituloSeccion}>Vendedores RRPP</Text>
+        {rrpp.map((item, index) => (
+          <RrppItemForm
+            key={`rrpp-${index}`}
+            item={item}
+            index={index}
+            errores={erroresRrpp[index]}
+            onChange={(campo, valor) => cambiarRrpp(index, campo, valor)}
+            onQuitar={() => {
+              setRrpp((actuales) => actuales.filter((_, i) => i !== index));
+              setErroresRrpp((actuales) => actuales.filter((_, i) => i !== index));
+            }}
+          />
+        ))}
+        <CustomButton
+          titulo="+ Agregar vendedor"
+          variante="secundario"
+          onPress={() => {
+            setRrpp((actuales) => [...actuales, { nombre: '', zona: '', telefono: '' }]);
+            setErroresRrpp((actuales) => [...actuales, {}]);
+          }}
+        />
+
         {errorGeneral ? <Text style={styles.errorGeneral}>{errorGeneral}</Text> : null}
 
         <CustomButton
@@ -201,6 +330,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold',
     marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  tituloSeccion: {
+    color: theme.colors.secondary,
+    fontSize: 14,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    marginTop: 16,
+    marginBottom: 10,
     textTransform: 'uppercase',
   },
   filaSwitch: {
