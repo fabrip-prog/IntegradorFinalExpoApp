@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import ColorPicker, { COLORES_FIESTA } from '../components/ColorPicker';
 import CustomButton from '../components/CustomButton';
+import FlyerPicker from '../components/FlyerPicker';
 import FormInput from '../components/FormInput';
 import PreventaItemForm from '../components/PreventaItemForm';
 import RrppItemForm from '../components/RrppItemForm';
@@ -36,6 +37,7 @@ export default function FiestaFormScreen({ navigation, route }) {
   const [preventas, setPreventas] = useState([]);
   const [rrpp, setRrpp] = useState([]);
   const [ubicacion, setUbicacion] = useState(null);
+  const [imagenUri, setImagenUri] = useState(null);
 
   const [errores, setErrores] = useState({});
   const [erroresPreventas, setErroresPreventas] = useState([]);
@@ -76,6 +78,7 @@ export default function FiestaFormScreen({ navigation, route }) {
             : []
         );
         setUbicacion(fiesta.ubicacion || null);
+        setImagenUri(fiesta.imagenUri || null);
         setRrpp(
           Array.isArray(fiesta.rrpp)
             ? fiesta.rrpp.map((item) => ({
@@ -174,18 +177,15 @@ export default function FiestaFormScreen({ navigation, route }) {
         telefono: String(item.telefono || '').replace(/\D/g, ''),
       })),
       ubicacion,
+      imagenUri,
     };
 
     setGuardando(true);
     try {
       if (esEdicion) {
-        // La imagen se conserva porque no forma parte de este formulario.
         await actualizarFiesta(fiestaId, datos);
       } else {
-        await crearFiesta(usuario.uid, {
-          ...datos,
-          imagenUri: null,
-        });
+        await crearFiesta(usuario.uid, datos);
       }
       navigation.goBack();
     } catch (error) {
@@ -251,6 +251,9 @@ export default function FiestaFormScreen({ navigation, route }) {
             thumbColor="#FFFFFF"
           />
         </View>
+
+        <Text style={styles.tituloSeccion}>Flyer</Text>
+        <FlyerPicker valor={imagenUri} onCambiar={setImagenUri} color={color} />
 
         <Text style={styles.tituloSeccion}>Ubicación</Text>
         <UbicacionPicker valor={ubicacion} onCambiar={setUbicacion} color={color} />

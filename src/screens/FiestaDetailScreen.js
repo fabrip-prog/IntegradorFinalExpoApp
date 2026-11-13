@@ -1,5 +1,13 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import ClimaCard from '../components/climaCard';
 import Countdown from '../components/Countdown';
@@ -19,9 +27,11 @@ export default function FiestaDetailScreen({ navigation, route }) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [eliminando, setEliminando] = useState(false);
+  const [errorImagen, setErrorImagen] = useState(false);
 
   const cargar = useCallback(async () => {
     setError('');
+    setErrorImagen(false);
     try {
       const datos = await obtenerFiesta(fiestaId);
       if (!datos) {
@@ -82,14 +92,30 @@ export default function FiestaDetailScreen({ navigation, route }) {
   }
 
   const color = fiesta.color || theme.colors.accent;
+  const mostrarFlyer = Boolean(fiesta.imagenUri) && !errorImagen;
+  const textosEncabezado = (
+    <>
+      {fiesta.destacada ? <Text style={[styles.destacada, { color }]}>★ Destacada</Text> : null}
+      <Text style={[styles.nombre, { color }]}>{fiesta.nombre}</Text>
+      <Text style={styles.tematica}>{fiesta.tematica}</Text>
+      <Text style={styles.fecha}>{formatearFecha(fiesta.fecha)}</Text>
+    </>
+  );
 
   return (
     <ScrollView style={styles.flex} contentContainerStyle={styles.contenedor}>
       <View style={[styles.encabezado, { borderColor: color, shadowColor: color }]}>
-        {fiesta.destacada ? <Text style={[styles.destacada, { color }]}>★ Destacada</Text> : null}
-        <Text style={[styles.nombre, { color }]}>{fiesta.nombre}</Text>
-        <Text style={styles.tematica}>{fiesta.tematica}</Text>
-        <Text style={styles.fecha}>{formatearFecha(fiesta.fecha)}</Text>
+        {mostrarFlyer ? (
+          <ImageBackground
+            source={{ uri: fiesta.imagenUri }}
+            style={styles.flyer}
+            onError={() => setErrorImagen(true)}
+          >
+            <View style={styles.capaOscura}>{textosEncabezado}</View>
+          </ImageBackground>
+        ) : (
+          <View style={styles.encabezadoSinFlyer}>{textosEncabezado}</View>
+        )}
       </View>
 
       <Text style={styles.seccion}>Cuenta regresiva</Text>
@@ -175,12 +201,26 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.card,
     borderRadius: 16,
     borderWidth: 1,
-    padding: 24,
-    alignItems: 'center',
+    overflow: 'hidden',
     shadowOpacity: 0.6,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 0 },
     elevation: 6,
+  },
+  encabezadoSinFlyer: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  flyer: {
+    minHeight: 260,
+  },
+  capaOscura: {
+    flex: 1,
+    minHeight: 260,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
   },
   destacada: {
     fontSize: 12,

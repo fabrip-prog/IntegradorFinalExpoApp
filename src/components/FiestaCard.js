@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { theme } from '../theme';
 import { diasQueFaltan, formatearFecha } from '../utils/fechas';
 
@@ -33,6 +33,9 @@ export default function FiestaCard({ fiesta, onPress }) {
       ]}
     >
       <View style={[styles.franjaColor, { backgroundColor: colorFiesta }]} />
+      {fiesta.imagenUri ? (
+        <Image source={{ uri: fiesta.imagenUri }} style={styles.miniatura} />
+      ) : null}
       <View style={styles.contenido}>
         <View style={styles.filaSuperior}>
           <Text style={styles.nombre} numberOfLines={1}>
@@ -90,6 +93,11 @@ const styles = StyleSheet.create({
   },
   franjaColor: {
     width: 6,
+  },
+  miniatura: {
+    width: 72,
+    alignSelf: 'stretch',
+    backgroundColor: '#262630',
   },
   contenido: {
     flex: 1,

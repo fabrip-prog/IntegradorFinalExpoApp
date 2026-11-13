@@ -22,6 +22,14 @@
     },
     "plugins": [
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "FiestaApp usa tus fotos para el flyer de la fiesta",
+          "cameraPermission": "FiestaApp usa la cámara para sacar la foto del flyer",
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-location",
         {
           "locationWhenInUsePermission": "FiestaApp usa tu ubicación para marcar dónde es la fiesta"
