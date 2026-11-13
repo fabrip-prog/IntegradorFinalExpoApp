@@ -28,7 +28,7 @@ export async function obtenerUbicacionActual() {
       latitud: posicion.coords.latitude,
       longitud: posicion.coords.longitude,
     };
-  } catch (error) {
+  } catch {
     throw new Error('No se pudo obtener tu ubicación. Intentá de nuevo.');
   }
 }
@@ -49,7 +49,7 @@ export async function obtenerDireccion(latitud, longitud) {
     const calle = [lugar.street, lugar.streetNumber].filter(Boolean).join(' ');
     const ciudad = lugar.city || lugar.subregion || lugar.region || '';
     return [calle, ciudad].filter(Boolean).join(', ');
-  } catch (error) {
+  } catch {
     return '';
   }
 }

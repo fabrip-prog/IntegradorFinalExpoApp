@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  ImageBackground,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -27,6 +28,7 @@ export default function HomeScreen({ navigation }) {
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState('');
+  const [flyerConError, setFlyerConError] = useState(null);
 
   const cargar = useCallback(async () => {
     setError('');
@@ -69,6 +71,8 @@ export default function HomeScreen({ navigation }) {
 
   const { proxima, destacadas, cantidadProximas, cantidadFinalizadas } = resumirFiestas(fiestas);
   const colorProxima = proxima?.color || theme.colors.accent;
+  // Si la fiesta tiene flyer y la imagen carga, se muestra de fondo y translúcido
+  const mostrarFlyer = Boolean(proxima?.imagenUri) && proxima.imagenUri !== flyerConError;
 
   return (
     <ScrollView
@@ -105,6 +109,14 @@ export default function HomeScreen({ navigation }) {
           onPress={() => irAlDetalle(proxima)}
           style={[styles.hero, { borderColor: colorProxima, shadowColor: colorProxima }]}
         >
+          {mostrarFlyer ? (
+            <ImageBackground
+              source={{ uri: proxima.imagenUri }}
+              style={StyleSheet.absoluteFill}
+              imageStyle={styles.heroFlyer}
+              onError={() => setFlyerConError(proxima.imagenUri)}
+            />
+          ) : null}
           <Text style={[styles.heroNombre, { color: colorProxima }]}>{proxima.nombre}</Text>
           <Text style={styles.heroTematica}>{proxima.tematica}</Text>
           <Text style={styles.heroFecha}>{formatearFecha(proxima.fecha)}</Text>
@@ -210,6 +222,10 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 0 },
     elevation: 6,
+  },
+  heroFlyer: {
+    borderRadius: 15,
+    opacity: 0.3,
   },
   heroNombre: {
     fontSize: 30,

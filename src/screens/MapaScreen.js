@@ -35,7 +35,7 @@ export default function MapaScreen({ navigation }) {
           centro = await obtenerUbicacionActual();
           setMiUbicacion(centro);
         }
-      } catch (errorGps) {
+      } catch {
         // Sin GPS igual se muestra el mapa con las fiestas
       }
 
