@@ -21,7 +21,7 @@ const DESCRIPCIONES = [
  * @param {number} codigo
  * @returns {{texto:string, icono:string}}
  */
-export function describirCodigo(codigo) {
+function describirCodigo(codigo) {
   const encontrado = DESCRIPCIONES.find((d) => d.codigos.includes(codigo));
   return encontrado || { texto: 'Sin datos', icono: '❔' };
 }
@@ -31,7 +31,7 @@ export function describirCodigo(codigo) {
  * @param {Date} fecha
  * @returns {string}
  */
-export function fechaParaApi(fecha) {
+function fechaParaApi(fecha) {
   const anio = fecha.getFullYear();
   const mes = String(fecha.getMonth() + 1).padStart(2, '0');
   const dia = String(fecha.getDate()).padStart(2, '0');
@@ -56,7 +56,7 @@ export async function obtenerPronostico(latitud, longitud, fecha) {
   let respuesta;
   try {
     respuesta = await fetch(url);
-  } catch (error) {
+  } catch {
     throw new Error('No hay conexión para consultar el clima.');
   }
 

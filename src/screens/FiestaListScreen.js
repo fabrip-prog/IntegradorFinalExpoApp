@@ -36,7 +36,7 @@ export default function FiestaListScreen({ navigation }) {
       try {
         const lista = await obtenerFiestasDeUsuario(usuario.uid);
         setFiestas(lista);
-      } catch (err) {
+      } catch {
         setError('No se pudieron cargar tus fiestas. Revisá tu conexión.');
       } finally {
         setCargando(false);

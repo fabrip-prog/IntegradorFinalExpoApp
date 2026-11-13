@@ -39,7 +39,7 @@ export default function ProfileScreen() {
     setCerrando(true);
     try {
       await cerrarSesion();
-    } catch (error) {
+    } catch {
       setCerrando(false);
       Alert.alert('No se pudo cerrar sesión', 'Probá de nuevo.');
     }

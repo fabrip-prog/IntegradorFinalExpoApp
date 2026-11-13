@@ -112,29 +112,12 @@ export function tiempoRestante(date) {
 }
 
 /**
- * Formatea una fecha al formato corto "DD/MM HH:MM".
- * @param {Date|Object|string} date
- * @returns {string}
- */
-export function formatearFechaCorta(date) {
-  const d = normalizarFecha(date);
-  if (!d) return '';
-
-  const dia = String(d.getDate()).padStart(2, '0');
-  const mes = String(d.getMonth() + 1).padStart(2, '0');
-  const horas = String(d.getHours()).padStart(2, '0');
-  const minutos = String(d.getMinutes()).padStart(2, '0');
-
-  return `${dia}/${mes} ${horas}:${minutos}`;
-}
-
-/**
  * Convierte un texto "DD/MM HH:MM" (o "DD/MM/AAAA HH:MM") en un Date usando el año de referencia.
  * @param {string} texto
  * @param {number} [anioReferencia]
  * @returns {Date|null}
  */
-export function parsearFechaCorta(texto, anioReferencia = new Date().getFullYear()) {
+function parsearFechaCorta(texto, anioReferencia = new Date().getFullYear()) {
   if (!texto) return null;
   const str = String(texto).trim();
 
