@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import ClimaCard from '../components/climaCard';
 import Countdown from '../components/Countdown';
 import CustomButton from '../components/CustomButton';
 import MapaFiesta from '../components/MapaFiesta';
@@ -9,7 +10,7 @@ import RrppCard from '../components/RrppCard';
 import { eliminarFiesta, obtenerFiesta } from '../services/fiestaService';
 import { theme } from '../theme';
 import { mensajeErrorFiesta } from '../utils/errores';
-import { formatearFecha } from '../utils/fechas';
+import { diasQueFaltan, formatearFecha } from '../utils/fechas';
 
 export default function FiestaDetailScreen({ navigation, route }) {
   const fiestaId = route?.params?.fiestaId;
@@ -103,6 +104,13 @@ export default function FiestaDetailScreen({ navigation, route }) {
 
       <Text style={styles.seccion}>Ubicación</Text>
       <MapaFiesta ubicacion={fiesta.ubicacion} color={color} nombre={fiesta.nombre} />
+
+      {diasQueFaltan(fiesta.fecha) >= 0 ? (
+        <>
+          <Text style={styles.seccion}>Clima para la fiesta</Text>
+          <ClimaCard ubicacion={fiesta.ubicacion} fecha={fiesta.fecha} />
+        </>
+      ) : null}
 
       <Text style={styles.seccion}>Tickets y preventas</Text>
       {fiesta.preventas?.length ? (
