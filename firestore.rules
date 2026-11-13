@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas para la colección de fiestas
+    match /fiestas/{fiestaId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null 
+                    && resource.data.userId == request.auth.uid 
+                    && request.resource.data.userId == resource.data.userId;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Cualquier otra ruta denegada
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
