@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 're
 import { useFocusEffect } from '@react-navigation/native';
 import Countdown from '../components/Countdown';
 import CustomButton from '../components/CustomButton';
+import MapaFiesta from '../components/MapaFiesta';
 import PreventaCard from '../components/PreventaCard';
 import RrppCard from '../components/RrppCard';
 import { eliminarFiesta, obtenerFiesta } from '../services/fiestaService';
@@ -99,6 +100,9 @@ export default function FiestaDetailScreen({ navigation, route }) {
           <Text style={styles.descripcion}>{fiesta.descripcion}</Text>
         </>
       ) : null}
+
+      <Text style={styles.seccion}>Ubicación</Text>
+      <MapaFiesta ubicacion={fiesta.ubicacion} color={color} nombre={fiesta.nombre} />
 
       <Text style={styles.seccion}>Tickets y preventas</Text>
       {fiesta.preventas?.length ? (

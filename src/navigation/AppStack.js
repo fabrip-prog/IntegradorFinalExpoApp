@@ -4,6 +4,7 @@ import { Text } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import FiestaListScreen from '../screens/FiestaListScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import MapaScreen from '../screens/MapaScreen';
 import FiestaFormScreen from '../screens/FiestaFormScreen';
 import FiestaDetailScreen from '../screens/FiestaDetailScreen';
 import { theme } from '../theme';
@@ -26,6 +27,7 @@ function TabNavigator() {
         tabBarIcon: ({ focused }) => {
           let icono = '🏠';
           if (route.name === 'Mis fiestas') icono = '🎉';
+          if (route.name === 'Mapa') icono = '🗺️';
           if (route.name === 'Perfil') icono = '👤';
           return (
             <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>
@@ -37,6 +39,7 @@ function TabNavigator() {
     >
       <Tab.Screen name="Inicio" component={HomeScreen} />
       <Tab.Screen name="Mis fiestas" component={FiestaListScreen} />
+      <Tab.Screen name="Mapa" component={MapaScreen} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
   );

@@ -14,6 +14,7 @@ import CustomButton from '../components/CustomButton';
 import FormInput from '../components/FormInput';
 import PreventaItemForm from '../components/PreventaItemForm';
 import RrppItemForm from '../components/RrppItemForm';
+import UbicacionPicker from '../components/UbicacionPicker';
 import { useAuth } from '../context/AuthContext';
 import { actualizarFiesta, crearFiesta, obtenerFiesta } from '../services/fiestaService';
 import { theme } from '../theme';
@@ -34,6 +35,7 @@ export default function FiestaFormScreen({ navigation, route }) {
   const [destacada, setDestacada] = useState(false);
   const [preventas, setPreventas] = useState([]);
   const [rrpp, setRrpp] = useState([]);
+  const [ubicacion, setUbicacion] = useState(null);
 
   const [errores, setErrores] = useState({});
   const [erroresPreventas, setErroresPreventas] = useState([]);
@@ -73,6 +75,7 @@ export default function FiestaFormScreen({ navigation, route }) {
               }))
             : []
         );
+        setUbicacion(fiesta.ubicacion || null);
         setRrpp(
           Array.isArray(fiesta.rrpp)
             ? fiesta.rrpp.map((item) => ({
@@ -170,17 +173,17 @@ export default function FiestaFormScreen({ navigation, route }) {
         zona: item.zona.trim(),
         telefono: String(item.telefono || '').replace(/\D/g, ''),
       })),
+      ubicacion,
     };
 
     setGuardando(true);
     try {
       if (esEdicion) {
-        // La ubicación y la imagen se conservan porque no forman parte de este formulario.
+        // La imagen se conserva porque no forma parte de este formulario.
         await actualizarFiesta(fiestaId, datos);
       } else {
         await crearFiesta(usuario.uid, {
           ...datos,
-          ubicacion: null,
           imagenUri: null,
         });
       }
@@ -248,6 +251,9 @@ export default function FiestaFormScreen({ navigation, route }) {
             thumbColor="#FFFFFF"
           />
         </View>
+
+        <Text style={styles.tituloSeccion}>Ubicación</Text>
+        <UbicacionPicker valor={ubicacion} onCambiar={setUbicacion} color={color} />
 
         <Text style={styles.tituloSeccion}>Preventas</Text>
         {preventas.map((item, index) => (
